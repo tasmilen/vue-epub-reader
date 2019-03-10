@@ -29,6 +29,8 @@
       :defaultTheme="defaultTheme"
       @onProgressChange="onProgressChange"
       :isBookReady="isBookReady"
+      :navigation="navigation"
+      @jumpTo="jumpTo"
       ref="menuBar"
     />
   </div>
@@ -97,10 +99,24 @@ export default {
       ],
       defaultTheme: 0,
       //book是否可用状态
-      isBookReady: false
+      isBookReady: false,
+      navigation: {}
     };
   },
   methods: {
+    //
+    jumpTo(href) {
+      this.rendition.display(href);
+      this.hideTitleAndMenu();
+    },
+    hideTitleAndMenu() {
+      // 隐藏标题和菜单栏
+      this.isTitleAndMenuShow = false;
+      // 隐藏菜单栏弹出的设置栏
+      this.$refs.menuBar.hideSetting();
+      // 隐藏目录
+      this.$refs.menuBar.hideContent();
+    },
     //progress数值 [0-100]
     onProgressChange(progress) {
       const percentage = progress / 100;
@@ -167,6 +183,8 @@ export default {
       // 通过epubjs的钩子函数实现
       this.book.ready
         .then(() => {
+          //目录
+          this.navigation = this.book.navigation;
           return this.book.locations.generate();
         })
         .then(() => {
