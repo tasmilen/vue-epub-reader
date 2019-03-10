@@ -91,7 +91,10 @@
           </div>
 
         </div>
-        <div class="setting-progress">
+        <div
+          class="setting-progress"
+          v-else-if="showTag === 2"
+        >
           <div class="progress-wrapper">
             <input
               class="progress"
@@ -112,15 +115,35 @@
         </div>
       </div>
     </transition>
+    <!-- <transition name="slide-right"> -->
+      <ContentView
+        :navigation="navigation"
+        :isBookReady="isBookReady"
+        v-show="isContentShow"
+        @jumpTo="jumpTo"
+      />
+    <!-- </transition> -->
+    <transition name="fade">
+      <div
+        class="content-mask"
+        v-show="isContentShow"
+        @click="hideContent"
+      ></div>
+    </transition>
   </div>
 </template>
 <script>
+import ContentView from "@/components/Content";
 export default {
+  components: {
+    ContentView
+  },
   data() {
     return {
       isSettingShow: false,
       showTag: 0,
-      progress: 0
+      progress: 0,
+      isContentShow: false
     };
   },
   props: {
@@ -132,9 +155,16 @@ export default {
     defaultFontSize: Number,
     themeList: Array,
     defaultTheme: Number,
-    isBookReady: Boolean
+    isBookReady: Boolean,
+    navigation: Object
   },
   methods: {
+    jumpTo(href) {
+      this.$emit("jumpTo", href);
+    },
+    hideContent() {
+      this.isContentShow = false;
+    },
     onProgressInput(progress) {
       this.progress = progress;
       this.$refs.progress.style.backgroundSize = `$(this.progress)% 100%`;
@@ -150,14 +180,18 @@ export default {
       this.$emit("setFontSize", fontSize);
     },
     showSetting(tag) {
-      this.isSettingShow = true;
+      if (tag === 3) {
+        this.isContentShow = true;
+        this.hideSetting();
+      } else {
+        this.isSettingShow = true;
+      }
       this.showTag = tag;
     },
     hideSetting() {
       this.isSettingShow = false;
     }
-  },
-  components: {}
+  }
 };
 </script>
 <style lang='scss' scoped>
@@ -325,6 +359,15 @@ export default {
         text-align: center;
       }
     }
+  }
+  .content-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 102;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
   }
 }
 </style>
